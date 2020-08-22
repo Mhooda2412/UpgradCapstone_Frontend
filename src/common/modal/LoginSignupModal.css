@@ -1,0 +1,41 @@
+#container-login-form {
+    display: block;
+}
+
+#container-signup-form {
+    display: none;
+}
+
+.modal-div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    height: auto;
+}
+
+.red {
+    color: red;
+}
+
+.login-page-content {
+    width: 100%;
+    text-align: -webkit-center;
+    margin-top: 1rem;
+}
+
+.login-card {
+    text-align: left;
+    width: fit-content;
+    padding: 40px;
+    margin: 10px;
+}
+
+.login-signup-form {
+    width: 300px;
+}
+
+.login-button-container, .signup-button-container {
+    text-align: -webkit-center;
+}
