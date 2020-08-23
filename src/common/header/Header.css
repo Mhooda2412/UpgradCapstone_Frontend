@@ -1,0 +1,51 @@
+.header {
+  flex-grow: 1;
+}
+
+.loginbuttonArea {
+  padding: 5px 5px 5px 20px;
+  float: right;
+  max-width: min-content;
+  position: relative;
+  display: flex;
+}
+
+.title {
+  display: none;
+}
+
+.search {
+  position: relative;
+  background-color: #263238;
+  width: 100%;
+}
+
+.searchIcon {
+  width: 7px;
+  height: 100%;
+  position: absolute;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center
+}
+
+.inputRoot {
+  color: inherit;
+}
+
+.inputInput {
+  padding: 5px 5px 5px 20px;
+  transition: width;
+  width: 100%;
+  color: #D3D3D3;
+  borderBottom: solid grey 0.1rem;
+}
+
+.sectionDesktop {
+  display: flex;
+}
+
+.sectionMobile {
+  display: flex;
+}
