@@ -53,7 +53,7 @@ class Header extends Component {
   // setting up the text search
   onSearchTextChange = (e) => {
 	// call to restaurantdata
-	// this.props.getRestaurantData(e.currentTarget.value);
+	this.props.getRestaurantData(e.currentTarget.value);
   }
   // close signup modal
   onCloseLoginSignupModal = (firstName) => {
