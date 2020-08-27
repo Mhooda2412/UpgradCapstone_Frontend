@@ -5,10 +5,14 @@
 .loginbuttonArea {
   padding: 5px 5px 5px 20px;
   float: right;
-  max-width: min-content;
   position: relative;
   display: flex;
 }
+
+@media screen and (max-width: 600px) {
+.loginbuttonArea {
+  width: 100%;
+}}
 
 .title {
   display: none;
