@@ -3,7 +3,7 @@ import "./Header.css";
 import AppBar from "@material-ui/core/AppBar";
 import IconButton from "@material-ui/core/IconButton";
 import FastfoodIcon from '@material-ui/icons/Fastfood';
-import InputBase from "@material-ui/core/InputBase";
+import Input from "@material-ui/core/Input";
 import SearchIcon from "@material-ui/icons/Search";
 import Button from "@material-ui/core/Button";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -52,8 +52,8 @@ class Header extends Component {
   }
   // setting up the text search
   onSearchTextChange = (e) => {
-	// call to restaurantdata  
-	// this.props.getRestaurantData(e.currentTarget.value);
+	// call to restaurantdata
+	this.props.getRestaurantData(e.currentTarget.value);
   }
   // close signup modal
   onCloseLoginSignupModal = (firstName) => {
@@ -95,20 +95,14 @@ class Header extends Component {
               </Grid>
               <Grid item xs={12} sm={4}>
                 {this.props.showSearchBar ?
-                  <div
-                    className='search'
-                    style={{ borderBottom: "solid black 0.1rem" }}
-                  >
-                    <div className='searchIcon'>
-                      <SearchIcon />
-                    </div>
-                    <InputBase
+                  <div className='search' style={{ borderBottom: "solid black 0.1rem" }}>
+                    <div className='searchIcon'> <SearchIcon /> </div>
+					<Input
                       placeholder="Search by Restaurant Name"
-                      className='inputRoot inputInput'
+                      className='inputRoot inputInput MuiInput-underline-24'
 					  style={{ color : "#D3D3D3" }}
                       inputProps={{ "aria-label": "search"}}
-                      onChange={this.onSearchTextChange}
-                    />
+                      onChange={this.onSearchTextChange}/>
                   </div> : ""}
               </Grid>
               <Grid item xs={12} sm={4} style={{ gridColumnStart: "revert", minWidth: '400px' }}>

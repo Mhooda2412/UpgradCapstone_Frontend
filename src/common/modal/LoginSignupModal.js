@@ -309,11 +309,10 @@ class LoginSignupModal extends Component {
                     open={this.props.openLoginSignupModal}
                     onClose={this.props.onCloseLoginSignupModal}
                     onBackdropClick={this.props.onCloseLoginSignupModal}>
-                    <div class="modal-div">
-                        <Tabs value={this.state.tab} indicatorColor="primary" textColor="primary"
-                            aria-label="disabled tabs example" defaultActiveKey='Login' onChange={(evt, value) => this.tabChange(evt, value)} >
-                            <Tab label="Login" value={'login'} eventKey="login" />
-                            <Tab label="Signup" value={'signup'} eventKey="Signup" />
+                    <div className="modal-div">
+                        <Tabs value={this.state.tab} indicatorColor="primary" textColor="primary" aria-label="disabled tabs example" onChange={(evt, value) => this.tabChange(evt, value)} >
+                            <Tab label="Login" value={'login'} />
+                            <Tab label="Signup" value={'signup'} />
                         </Tabs>
                         {/******************* Login Form *******************/}
                         <Container id="container-login-form"  >
