@@ -5,10 +5,14 @@
 .loginbuttonArea {
   padding: 5px 5px 5px 20px;
   float: right;
-  max-width: min-content;
   position: relative;
   display: flex;
 }
+
+@media screen and (max-width: 600px) {
+.loginbuttonArea {
+  width: 100%;
+}}
 
 .title {
   display: none;
@@ -39,8 +43,19 @@
   transition: width;
   width: 100%;
   color: #D3D3D3;
-  borderBottom: solid grey 0.1rem;
 }
+
+.MuiInput-underline-24:hover:not(.MuiInput-disabled-23):not(.MuiInput-focused-22):not(.MuiInput-error-25):after {
+    border-bottom: 2px solid #ffffff !important;
+}
+
+/*.MuiInput-underline:after {
+    transform: scaleX(1);
+    transition: transform 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;
+    border-bottom: 2px solid #ffffff;
+}
+
+.MuiInput-colorSecondary.MuiInput-underline:after{ border-bottom: 2px solid #ffffff; }*/
 
 .sectionDesktop {
   display: flex;
