@@ -40,14 +40,6 @@ const styles = theme => ({
             width: '50%',
         }
     },
-    existingAddressTabContainer: {
-        float: 'left',
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
-        overflow: 'hidden',
-        backgroundColor: theme.palette.background.paper,
-    },
     gridList: { //Style for the Grid List 
         flexWrap: 'nowrap',
         // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
@@ -82,6 +74,10 @@ const styles = theme => ({
         'font-weight': 400,
         'width': '150px'
     },
+    gridContent:{ 
+         'width':'fit-content', 
+        'height':'fit-content' 
+    }
 
 })
 
@@ -106,7 +102,7 @@ class Checkout extends Component {
             activeStep: 0,
             steps: this.getSteps(),
             value: 0,
-            addresses: null,
+            addresses: [],
             noOfColumn: 3,
             isLoggedIn: sessionStorage.getItem('access-token') === null ? false : true,
             selectedAddress: "",
@@ -122,6 +118,7 @@ class Checkout extends Component {
             pincodeRequired: "dispNone",
             pincodeHelpText: "dispNone",
             states: [],
+            accessToken: sessionStorage.getItem('access-token'),
 
 
         }
@@ -322,9 +319,11 @@ class Checkout extends Component {
 
         xhrAddress.addEventListener('readystatechange', function () {
             if (xhrAddress.readyState === 4 && xhrAddress.status === 200) {
-                let responseAddresses = JSON.parse(xhrAddress.responseText).addresses;
                 let addresses = [];
-                if (!responseAddresses === null) {
+                let responseAddresses = JSON.parse(xhrAddress.responseText).addresses;
+                console.log(responseAddresses)
+                if (responseAddresses !== null) {
+                    console.log('if statement')
                     responseAddresses.forEach(responseAddress => {
                         let address = {
                             id: responseAddress.id,
@@ -353,6 +352,7 @@ class Checkout extends Component {
 
     render() {
         const { classes } = this.props
+        console.log(this.state)
         return (
             <div>
                 <Header></Header>
@@ -373,9 +373,9 @@ class Checkout extends Component {
                                                         </Tabs>
                                                         {
                                                             this.state.value === 0 &&
-                                                            <TabContainer className={classes.existingAddressTabContainer}>
+                                                            <TabContainer  >
                                                                 {
-                                                                    this.state.addresses === null || undefined ?
+                                                                    this.state.addresses.length === 0 ?
                                                                         <Typography variant='h6' color='textSecondary'>
                                                                             There are no saved addresses! You can save an address using the 'New Address' tab or using your 'Profile' menu option.
                                                                         </Typography>
@@ -384,11 +384,11 @@ class Checkout extends Component {
                                                                             {this.state.addresses.map(address => (
                                                                                 <GridListTile className={classes.gridListTile} key={address.id} style={{ borderColor: address.selected ? "rgb(224,37,96)" : "white" }}>
                                                                                     <div className="grid-list-tile-container">
-                                                                                        <Typography variant="body1" component="p">{address.flatBuildingName}</Typography>
-                                                                                        <Typography variant="body1" component="p">{address.locality}</Typography>
-                                                                                        <Typography variant="body1" component="p">{address.city}</Typography>
-                                                                                        <Typography variant="body1" component="p">{address.state.state_name}</Typography>
-                                                                                        <Typography variant="body1" component="p">{address.pincode}</Typography>
+                                                                                        <Typography variant="body1" component="p" className={classes.gridContent}>{address.flatBuildingName}</Typography>
+                                                                                        <Typography variant="body1" component="p" className={classes.gridContent}>{address.locality}</Typography>
+                                                                                        <Typography variant="body1" component="p" className={classes.gridContent}>{address.city}</Typography>
+                                                                                        <Typography variant="body1" component="p" className={classes.gridContent}>{address.state.state_name}</Typography>
+                                                                                        <Typography variant="body1" component="p" className={classes.gridContent}>{address.pincode}</Typography>
                                                                                         <IconButton className={classes.addressCheckButton} onClick={() => this.addressSelectedClickHandler(address.id)}>
                                                                                             <CheckCircleIcon style={{ color: address.selected ? "green" : "grey" }} />
                                                                                         </IconButton>
