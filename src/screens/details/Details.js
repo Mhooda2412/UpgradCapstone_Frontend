@@ -329,6 +329,7 @@ class Details extends Component {
         {/* Rendering the header and passing the parameter showHeaderSearchBox as false to not render the searchBox 
             also changeBadgeVisibility function is passed to change the visibility when the modal is open. */}
         <Header
+          history={this.props.history}
           baseUrl={this.props.baseUrl}
           showHeaderSearchBox={false}
           changeBadgeVisibility={this.changeBadgeVisibility}
