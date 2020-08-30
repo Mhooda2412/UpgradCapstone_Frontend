@@ -1,7 +1,9 @@
-import React, { Component } from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
-import Home from "./home/Home";
-import Profile from "./profile/Profile";
+
+import React, { Component } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Home from './home/Home';
+import Profile from './profile/Profile';
+import Checkout from './checkout/Checkout'
 import Details from "./details/Details";
 
 class Controller extends Component {
@@ -13,6 +15,7 @@ class Controller extends Component {
     return (
       <Router>
         <div className="main-container">
+          <Route exact path='/checkout' render={(props)=><Checkout {...props} baseUrl={this.baseUrl}/>}/>
           <Route
             exact
             path="/"
