@@ -21,7 +21,12 @@ import FormHelperText from '@material-ui/core/FormHelperText'
 import Select from '@material-ui/core/Select'
 import MenuItem from '@material-ui/core/MenuItem'
 import Button from '@material-ui/core/Button'
-
+import FormLabel from '@material-ui/core/FormLabel'
+import RadioGroup from '@material-ui/core/RadioGroup'
+import Radio from '@material-ui/core/Radio'
+import Snackbar from '@material-ui/core/Snackbar'
+import CloseIcon from '@material-ui/icons/Close'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 
 
@@ -74,10 +79,17 @@ const styles = theme => ({
         'font-weight': 400,
         'width': '150px'
     },
-    gridContent:{ 
-         'width':'fit-content', 
-        'height':'fit-content' 
-    }
+    gridContent: {
+        'width': 'fit-content',
+        'height': 'fit-content'
+    },
+    actionsContainer: { //Style for the action container in the stepper
+        marginBottom: theme.spacing(2),
+    },
+    button: { //style for the button in the stepper
+        marginTop: theme.spacing(2),
+        marginRight: theme.spacing(1),
+    },
 
 })
 
@@ -119,6 +131,10 @@ class Checkout extends Component {
             pincodeHelpText: "dispNone",
             states: [],
             accessToken: sessionStorage.getItem('access-token'),
+            selectedPayment: "",
+            payment: [],
+            snackBarOpen: false,
+            snackBarMessage: "",
 
 
         }
@@ -136,7 +152,7 @@ class Checkout extends Component {
         });
     }
 
-     // This method is called when the save address button is clicked from the address form 
+    // This method is called when the save address button is clicked from the address form 
     //This method uses save address endpoint and sends the data as required by the endpoint to be persisted in the data base.
     saveAddressClickHandler = () => {
         if (this.saveAddressFormValid()) { //checking the form validity is right only then the api call is made
@@ -249,8 +265,8 @@ class Checkout extends Component {
         })
     }
 
-     //This method handles change in the input of state
-     selectSelectedStateChangeHandler = (event) => {
+    //This method handles change in the input of state
+    selectSelectedStateChangeHandler = (event) => {
         this.setState({
             ...this.state,
             selectedState: event.target.value,
@@ -263,6 +279,47 @@ class Checkout extends Component {
             ...this.state,
             pincode: event.target.value,
         })
+    }
+
+     //This method is called when back button is clicked in the stepper
+     backButtonClickHandler = () => {
+        let activeStep = this.state.activeStep;
+        activeStep--;
+        this.setState({
+            ...this.state,
+            activeStep: activeStep,
+        });
+    }
+
+    //This method is called when next button is clicked in the stepper.
+    nextButtonClickHandler = () => {
+        if (this.state.value === 0) {
+            if (this.state.selectedAddress !== "") {
+                let activeStep = this.state.activeStep;
+                activeStep++;
+                this.setState({
+                    ...this.state,
+                    activeStep: activeStep,
+                });
+            } else {
+                this.setState({
+                    ...this.state,
+                    snackBarOpen: true,
+                    snackBarMessage: "Select Address"
+                })
+            }
+        }
+        if(this.state.activeStep === 1){
+            if(this.state.selectedPayment === ""){
+                let activeStep = this.state.activeStep;
+                this.setState({
+                    ...this.state,
+                    activeStep:activeStep,
+                    snackBarOpen: true,
+                    snackBarMessage:"Select Payment",
+                })
+            }
+        }
     }
 
     // This Method is called when the address is selected from the existing address tab
@@ -281,6 +338,27 @@ class Checkout extends Component {
             ...this.state,
             addresses: addresses,
             selectedAddress: selectedAddress
+        })
+    }
+
+    //This is called when a radio button is selected  in the payment
+    radioChangeHandler = (event) => {
+        this.setState({
+            ...this.state,
+            selectedPayment: event.target.value,
+        })
+    }
+
+
+     //This method handles the snackbar close call
+     snackBarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.setState({
+            ...this.state,
+            snackBarMessage: "",
+            snackBarOpen: false,
         })
     }
 
@@ -308,9 +386,42 @@ class Checkout extends Component {
             xhrStates.open('GET', this.props.baseUrl + 'states');
             xhrStates.send(statesData);
 
+
+            //API call to get all payment methods 
+            let paymentData = null;
+            let xhrPayment = new XMLHttpRequest();
+            xhrPayment.addEventListener("readystatechange", function () {
+                if (xhrPayment.readyState === 4 && xhrPayment.status === 200) {
+                    let payment = JSON.parse(xhrPayment.responseText).paymentMethods;
+                    that.setState({
+                        ...that.state,
+                        payment: payment,
+                    })
+                }
+            })
+            xhrPayment.open('GET', this.props.baseUrl + 'payment');
+            xhrPayment.send(paymentData);
+
+            window.addEventListener('resize', this.getGridListColumn); //Adding a event listening on the  to change the no of columns for the grid.
+
         }
     }
-    
+
+    // Updates the column no as per the screen size.
+    getGridListColumn = () => {
+        if (window.innerWidth <= 600) {
+            this.setState({
+                ...this.state,
+                noOfColumn: 2
+            });
+        } else {
+            this.setState({
+                ...this.state,
+                noOfColumn: 3
+            });
+        }
+    }
+
 
     getAllAddress = () => {
         let data = null;
@@ -443,39 +554,97 @@ class Checkout extends Component {
                                                                     </FormHelperText>
                                                                 </FormControl>
                                                                 <br />
-                                                        <br />
-                                                        <FormControl required className={classes.formControl}>
-                                                            <InputLabel htmlFor="pincode">Pincode</InputLabel>
-                                                            <Input id="pincode" className="input-fields" pincode={this.state.pincode} fullWidth={true} onChange={this.inputPincodeChangeHandler} value={this.state.pincode} />
-                                                            <FormHelperText className={this.state.pincodeRequired}>
-                                                                <span className="red">required</span>
-                                                            </FormHelperText>
-                                                            <FormHelperText className={this.state.pincodeHelpText}>
-                                                                <span className="red">Pincode must contain only numbers and must be 6 digits long</span>
-                                                            </FormHelperText>
-                                                        </FormControl>
-                                                        <br />
-                                                        <br />
-                                                        <br />
-                                                        <Button variant="contained" className={classes.formButton} color="secondary" onClick={this.saveAddressClickHandler}>SAVE ADDRESS</Button>
+                                                                <br />
+                                                                <FormControl required className={classes.formControl}>
+                                                                    <InputLabel htmlFor="pincode">Pincode</InputLabel>
+                                                                    <Input id="pincode" className="input-fields" pincode={this.state.pincode} fullWidth={true} onChange={this.inputPincodeChangeHandler} value={this.state.pincode} />
+                                                                    <FormHelperText className={this.state.pincodeRequired}>
+                                                                        <span className="red">required</span>
+                                                                    </FormHelperText>
+                                                                    <FormHelperText className={this.state.pincodeHelpText}>
+                                                                        <span className="red">Pincode must contain only numbers and must be 6 digits long</span>
+                                                                    </FormHelperText>
+                                                                </FormControl>
+                                                                <br />
+                                                                <br />
+                                                                <br />
+                                                                <Button variant="contained" className={classes.formButton} color="secondary" onClick={this.saveAddressClickHandler}>SAVE ADDRESS</Button>
 
 
                                                             </TabContainer>
                                                         }
                                                     </div>
                                                     :
-                                                    ""
+                                                    <div className="payment-container">
+                                                        <FormControl component="fieldset" className={classes.radioFormControl}>
+                                                            <FormLabel component="legend">
+                                                                Select Mode of Payment
+                                                            </FormLabel>
+                                                            <RadioGroup aria-label='payment' nmae='payment' value={this.state.selectedPayment} onChange={this.radioChangeHandler}>
+                                                                {
+                                                                    this.state.payment.map(payment => (
+                                                                        <FormControlLabel
+                                                                            key={payment.id}
+                                                                            value={payment.id}
+                                                                            control={<Radio />}
+                                                                            label={payment.payment_name}
+                                                                        >
+
+                                                                        </FormControlLabel>
+                                                                    ))
+                                                                }
+
+                                                            </RadioGroup>
+                                                        </FormControl>
+
+                                                    </div>
                                             }
+                                            <div className={classes.actionsContainer}>
+                                                <div>
+                                                    <Button disabled={this.state.activeStep === 0}
+                                                    onClick={this.backButtonClickHandler}
+                                                    className={classes.button}>
+                                                        Back
+                                                    </Button>
+                                                    <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={this.nextButtonClickHandler}
+                                                    className={classes.button}
+                                                    >
+                                                    {this.state.activeStep === this.state.steps.length - 1 ? 'Finish' : 'Next'}
+                                                </Button>
+                                                </div>
+                                            </div>
                                         </StepContent>
-
                                     </Step>
-
                                 ))
                             }
 
                         </Stepper>
                     </div>
 
+                </div>
+                <div>
+                    <Snackbar
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left',
+                        }}
+                        open={this.state.snackBarOpen}
+                        autoHideDuration={4000}
+                        onClose={this.snackBarClose}
+                        TransitionComponent={this.state.transition}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">{this.state.snackBarMessage}</span>}
+                        action={
+                            <IconButton color='inherit' onClick={this.snackBarClose}>
+                                <CloseIcon />
+                            </IconButton>
+                        }
+                    />
                 </div>
             </div>
         )
