@@ -33,6 +33,8 @@ import CardHeader from '@material-ui/core/CardHeader'
 import CardContent from '@material-ui/core/CardContent'
 import FilledInput from '@material-ui/core/FilledInput'
 import Divider from '@material-ui/core/Divider'
+import { Redirect } from 'react-router-dom'
+import 'font-awesome/css/font-awesome.min.css';
 
 
 
