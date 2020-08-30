@@ -16,6 +16,10 @@
         width: 100%;
         padding: 0px;
     }
+    .summary-container{
+        width:100%;
+        margin-top: 5px;
+    }
 }
 
 
@@ -23,12 +27,20 @@
     .stepper-container{
         width: 60%;
     }
+    .summary-container{
+        width:40%;
+        margin-top: 5px;
+    }
 }
 
 /* Responsive code */
 @media screen and (min-width:1200px){
     .stepper-container{
       width: 74%;
+    }
+    .summary-container{
+        width:25%;
+        margin-top: 5px;
     }
 }
 
@@ -51,4 +63,40 @@
 /* Style to show the element */
 .dispBlock {
     display: block;
+}
+
+/* Style for the menu item container */
+.menu-item-container{
+    display: flex;
+    align-items: center;
+}
+
+/* Style for the Suammry item price container */
+.summary-item-price-container{
+    display:flex;
+    align-items: baseline;
+    color: grey;
+}
+
+/* Style for the Coupon Conatiner */
+.coupon-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0px;
+}
+
+
+/* Style for the label  */
+.label-amount-container{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 10px 0px;
+}
+
+/* Style for the Summary  amount */
+.amount{
+    display:flex;
+    align-items: baseline;
 }

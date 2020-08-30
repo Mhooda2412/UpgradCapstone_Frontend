@@ -27,7 +27,12 @@ import Radio from '@material-ui/core/Radio'
 import Snackbar from '@material-ui/core/Snackbar'
 import CloseIcon from '@material-ui/icons/Close'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
-
+import Paper from '@material-ui/core/Paper'
+import Card from '@material-ui/core/Card'
+import CardHeader from '@material-ui/core/CardHeader'
+import CardContent from '@material-ui/core/CardContent'
+import FilledInput from '@material-ui/core/FilledInput'
+import Divider from '@material-ui/core/Divider'
 
 
 
@@ -90,6 +95,52 @@ const styles = theme => ({
         marginTop: theme.spacing(2),
         marginRight: theme.spacing(1),
     },
+    resetContainer: { // Style for the reset container
+        padding: theme.spacing(3),
+    },
+    summaryHeader: { //Style for the summary heading 
+        'margin-left': '10px',
+        'margin-right': '10px'
+    },
+    cardContent: { //Style for the Order summary card content 
+        'padding-top': '0px',
+        'margin-left': '10px',
+        'margin-right': '10px'
+    },
+    restaurantName: { //Style for the restaurant name
+        'font-size': '18px',
+        'color': 'rgb(85,85,85)',
+        margin: '10px 0px 10px 0px'
+    },
+    menuItemName: { //Style for the menu item in the summary card
+        'margin-left': '10px',
+        color: 'grey'
+    },
+    itemQuantity: { // Style for the Item quantity 
+        'margin-left': 'auto',
+        'margin-right': '30px',
+        color: 'grey'
+    },
+    couponInput: {// Style for the input coupon
+        'width': '200px',
+        '@media(min-width:1300px)': {
+            width: '200px',
+        },
+        '@media(max-width:600px)': {
+            width: '200px',
+        }
+
+
+    },
+    applyButton: { //Style for the apply button
+        height: '40px'
+    },
+    divider: { //Style for the divider 
+        'margin': '10px 0px'
+    },
+    placeOrderButton: { //Style for the Place order button in the order card
+        'font-weight': '400'
+    },
 
 })
 
@@ -108,8 +159,9 @@ TabContainer.propTypes = {
 }
 
 class Checkout extends Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
+       
         this.state = {
             activeStep: 0,
             steps: this.getSteps(),
@@ -135,6 +187,12 @@ class Checkout extends Component {
             payment: [],
             snackBarOpen: false,
             snackBarMessage: "",
+            cartItems: props.location.cartItems ? props.location.cartItems : [],//Setting state with details passed from the previous page
+            restaurantDetails: props.location.restaurantDetails ? props.location.restaurantDetails : { name: null }, //Setting state with details passed from the previous page
+            coupon: null,
+            couponName: "",
+            couponNameRequired: "dispNone",
+            couponNameHelpText: "dispNone",
 
 
         }
@@ -281,13 +339,21 @@ class Checkout extends Component {
         })
     }
 
-     //This method is called when back button is clicked in the stepper
-     backButtonClickHandler = () => {
+    //This method is called when back button is clicked in the stepper
+    backButtonClickHandler = () => {
         let activeStep = this.state.activeStep;
         activeStep--;
         this.setState({
             ...this.state,
             activeStep: activeStep,
+        });
+    }
+
+    //This method is called when the change button in the stepper is called
+    changeButtonClickHandler = () => {
+        this.setState({
+            ...this.state,
+            activeStep: 0,
         });
     }
 
@@ -309,14 +375,14 @@ class Checkout extends Component {
                 })
             }
         }
-        if(this.state.activeStep === 1){
-            if(this.state.selectedPayment === ""){
+        if (this.state.activeStep === 1) {
+            if (this.state.selectedPayment === "") {
                 let activeStep = this.state.activeStep;
                 this.setState({
                     ...this.state,
-                    activeStep:activeStep,
+                    activeStep: activeStep,
                     snackBarOpen: true,
-                    snackBarMessage:"Select Payment",
+                    snackBarMessage: "Select Payment",
                 })
             }
         }
@@ -350,8 +416,8 @@ class Checkout extends Component {
     }
 
 
-     //This method handles the snackbar close call
-     snackBarClose = (event, reason) => {
+    //This method handles the snackbar close call
+    snackBarClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
@@ -361,6 +427,62 @@ class Checkout extends Component {
             snackBarOpen: false,
         })
     }
+
+    //This method handles change in the input of coupon name
+    inputCouponNameChangeHandler = (event) => {
+        this.setState({
+            ...this.state,
+            couponName: event.target.value,
+        })
+    }
+
+    //This method handles the click on the apply button & calls the api to get coupon by name.
+    //If the coupon is invalid it will display invalid or else it will apply the coupon.
+    applyButtonClickHandler = () => {
+        let isCouponNameValid = true;
+        let couponNameRequired = "dispNone";
+        let couponNameHelpText = "dispNone";
+        if (this.state.couponName === "") {
+            isCouponNameValid = false;
+            couponNameRequired = "dispBlock";
+            this.setState({
+                couponNameRequired: couponNameRequired,
+                couponNameHelpText: couponNameHelpText,
+            })
+        }
+
+        //Api is called only when the data entered is right.
+        if (isCouponNameValid) {
+            let couponData = null;
+            let that = this;
+            let xhrCoupon = new XMLHttpRequest();
+            xhrCoupon.addEventListener("readystatechange", function () {
+                if (xhrCoupon.readyState === 4) {
+                    if (xhrCoupon.status === 200) {
+                        let coupon = JSON.parse(xhrCoupon.responseText)
+                        that.setState({
+                            ...that.state,
+                            coupon: coupon,
+                        })
+                    } else {
+                        that.setState({
+                            ...that.state,
+                            couponNameHelpText: "dispBlock",
+                            couponNameRequired: "dispNone"
+                        })
+                    }
+                }
+            })
+
+            xhrCoupon.open('GET', this.props.baseUrl + '/order/coupon/' + this.state.couponName)
+            xhrCoupon.setRequestHeader('authorization', 'Bearer ' + this.state.accessToken)
+            xhrCoupon.setRequestHeader("Content-Type", "application/json");
+            xhrCoupon.setRequestHeader("Cache-Control", "no-cache");
+            xhrCoupon.send(couponData);
+        }
+
+    }
+
 
     //This method is called when the components are mounted and in turn calls the api.
     //This method call get all address,get all states and get all payment endpoints.
@@ -422,6 +544,31 @@ class Checkout extends Component {
         }
     }
 
+    //This method returns Subtotal.
+    getSubTotal = () => {
+        let subTotal = 0;
+        this.state.cartItems.forEach(cartItem => {
+            subTotal = subTotal + cartItem.totalAmount;
+        })
+        return subTotal;
+    }
+
+    //This Method returns discount amount if applied.
+    getDiscountAmount = () => {
+        let discountAmount = 0;
+        if (this.state.coupon !== null) {
+            discountAmount = (this.getSubTotal() * this.state.coupon.percent) / 100;
+            return discountAmount
+        }
+        return discountAmount;
+    }
+     
+    //This method returns net amount.
+      getNetAmount = () => {
+        let netAmount = this.getSubTotal() - this.getDiscountAmount();
+        return netAmount;
+    }
+
 
     getAllAddress = () => {
         let data = null;
@@ -432,9 +579,7 @@ class Checkout extends Component {
             if (xhrAddress.readyState === 4 && xhrAddress.status === 200) {
                 let addresses = [];
                 let responseAddresses = JSON.parse(xhrAddress.responseText).addresses;
-                console.log(responseAddresses)
                 if (responseAddresses !== null) {
-                    console.log('if statement')
                     responseAddresses.forEach(responseAddress => {
                         let address = {
                             id: responseAddress.id,
@@ -461,11 +606,73 @@ class Checkout extends Component {
 
     }
 
+    // This method is called when the placeOrderButton is Clicked.
+    //This method calls the save order endpoint to save the order that has been created and returns with a order placed msg and id.
+    //If the API call is successfull relevant msg is shown in the snackbar other wise error msg is shown.
+    placeOrderButtonClickHandler = () => {
+        let item_quantities = [];
+        this.state.cartItems.forEach(cartItem => {
+            item_quantities.push({
+                'item_id': cartItem.id,
+                'price': cartItem.totalAmount,
+                'quantity': cartItem.quantity,
+            });
+        })
+        let newOrderData = JSON.stringify({ //Creating the data as required.
+            "address_id": this.state.selectedAddress,
+            "bill": Math.floor(Math.random() * 100),
+            "coupon_id": this.state.coupon !== null ? this.state.coupon.id : "",
+            "discount": this.getDiscountAmount(),
+            "item_quantities": item_quantities,
+            "payment_id": this.state.selectedPayment,
+            "restaurant_id": this.state.restaurantDetails.id,
+        })
+        let that = this;
+        let xhrOrder = new XMLHttpRequest();
+        xhrOrder.addEventListener("readystatechange", function () {
+            if (xhrOrder.readyState === 4) {
+                if (xhrOrder.status === 201) {
+                    let responseOrder = JSON.parse(xhrOrder.responseText)
+                    that.setState({
+                        ...that.state,
+                        snackBarOpen: true,
+                        snackBarMessage: "Order placed successfully! Your order ID is " + responseOrder.id,
+                    });
+                } else {
+                
+                    that.setState({
+                        ...that.state,
+                        snackBarOpen: true,
+                        snackBarMessage: "Unable to place your order! Please try again!",
+                    });
+                }
+            }
+        })
+        xhrOrder.open('POST', this.props.baseUrl + 'order')
+        xhrOrder.setRequestHeader('authorization', 'Bearer ' + this.state.accessToken)
+        xhrOrder.setRequestHeader('Content-Type', 'application/json');
+        xhrOrder.send(newOrderData);
+    }
+
+     //This method is called every time the page is rendered to check if the customer is logged in if not then redirected to the home page. 
+     redirectToHome = () => {
+        if (!this.state.isLoggedIn) {
+            return <Redirect to="/" />
+        }
+    }
+    logoutRedirectToHome = () => {
+        this.setState({
+            ...this.state,
+            isLoggedIn: false,
+        })
+    }
+
     render() {
         const { classes } = this.props
-        console.log(this.state)
         return (
             <div>
+
+                {this.redirectToHome() /*This method is called to check if logged in or not else redirected to home.*/} 
                 <Header></Header>
                 <div className="checkout-container">
                     <div className="stepper-container">
@@ -602,18 +809,18 @@ class Checkout extends Component {
                                             <div className={classes.actionsContainer}>
                                                 <div>
                                                     <Button disabled={this.state.activeStep === 0}
-                                                    onClick={this.backButtonClickHandler}
-                                                    className={classes.button}>
+                                                        onClick={this.backButtonClickHandler}
+                                                        className={classes.button}>
                                                         Back
                                                     </Button>
                                                     <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={this.nextButtonClickHandler}
-                                                    className={classes.button}
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={this.nextButtonClickHandler}
+                                                        className={classes.button}
                                                     >
-                                                    {this.state.activeStep === this.state.steps.length - 1 ? 'Finish' : 'Next'}
-                                                </Button>
+                                                        {this.state.activeStep === this.state.steps.length - 1 ? 'Finish' : 'Next'}
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </StepContent>
@@ -622,6 +829,88 @@ class Checkout extends Component {
                             }
 
                         </Stepper>
+                        {
+                            this.state.activeStep === this.state.steps.length &&
+                            (
+                                <Paper square elevation={0} className={classes.resetContainer}>
+                                    <Typography>View the summary and place your order now!</Typography>
+                                    <Button onClick={this.changeButtonClickHandler} className={classes.button}>
+                                        Change
+                                    </Button>
+
+                                </Paper>
+                            )
+                        }
+                    </div>
+                    <div className="summary-container">
+                        <Card className={classes.summary}>
+                            <CardHeader
+                                title="Summary"
+                                titleTypographyProps={{
+                                    variant: 'h5'
+                                }}
+                                className={classes.summaryHeader}
+                            />
+                            <CardContent className={classes.cardContent}>
+                                <Typography variant='subtitle1' component='p' className={classes.restaurantName}>{this.state.restaurantDetails.name}</Typography>
+                                {
+                                    this.state.cartItems.map(cartItem => (
+                                        <div className="menu-item-container" key={cartItem.id}>
+                                            <i className="fa fa-stop-circle-o" aria-hidden="true" style={{ color: cartItem.itemType === "NON_VEG" ? "#BE4A47" : "#5A9A5B" }}></i>
+                                            <Typography variant="subtitle1" component="p" className={classes.menuItemName} id="summary-menu-item-name" >{cartItem.name[0].toUpperCase() + cartItem.name.slice(1)}</Typography>
+                                            <Typography variant="subtitle1" component="p" className={classes.itemQuantity}>{cartItem.quantity}</Typography>
+                                            <div className="summary-item-price-container">
+                                                <i className="fa fa-inr" aria-hidden="true" style={{ color: 'grey' }}></i>
+                                                <Typography variant="subtitle1" component="p" className={classes.itemPrice} id="summary-item-price">{cartItem.totalAmount.toFixed(2)}</Typography>
+                                            </div>
+
+                                        </div>
+                                    ))
+                                }
+                                <div className="coupon-container">
+                                    <FormControl className={classes.formControlCoupon}>
+                                        <InputLabel htmlFor="coupon">Coupon Code</InputLabel>
+                                        <FilledInput id="coupon" className={classes.couponInput} value={this.state.couponName} onChange={this.inputCouponNameChangeHandler} placeholder="Ex: FLAT30"  ></FilledInput>
+                                        <FormHelperText className={this.state.couponNameRequired}>
+                                            <span className="red">required</span>
+                                        </FormHelperText>
+                                        <FormHelperText className={this.state.couponNameHelpText}>
+                                            <span className="red">invalid coupon</span>
+                                        </FormHelperText>
+
+                                    </FormControl>
+                                    <Button variant="contained" color="default" className={classes.applyButton} onClick={this.applyButtonClickHandler} size="small">APPLY</Button>
+                                </div>
+                                <div className="label-amount-container">
+                                    <Typography variant="subtitle2" component="p" style={{ color: 'grey' }}>Sub Total</Typography>
+                                    <div className="amount">
+                                        <i className="fa fa-inr" aria-hidden="true" style={{ color: 'grey' }}></i>
+                                        <Typography variant="subtitle1" component="p" style={{ color: 'grey' }} id="summary-net-amount">{this.getSubTotal().toFixed(2)}</Typography>
+                                    </div>
+                                </div>
+                                <div className="label-amount-container">
+                                    <Typography variant="subtitle2" component="p" className={classes.netAmount} style={{ color: 'grey' }}>Discount</Typography>
+                                    <div className="amount">
+                                        <i className="fa fa-inr" aria-hidden="true" style={{ color: 'grey' }}></i>
+                                        <Typography variant="subtitle1" component="p" style={{ color: 'grey' }} id="summary-net-amount">{this.getDiscountAmount().toFixed(2)}</Typography>
+                                    </div>
+                                </div>
+                                <Divider className={classes.divider} />
+                                <div className="label-amount-container">
+                                    <Typography variant="subtitle2" component="p" className={classes.netAmount}>Net Amount</Typography>
+                                    <div className="amount">
+                                        <i className="fa fa-inr" aria-hidden="true" style={{ color: 'grey' }}></i>
+                                        <Typography variant="subtitle1" component="p" className={classes.itemPrice} id="summary-net-amount">{this.getNetAmount().toFixed(2)}</Typography>
+                                    </div>
+                                </div>
+
+                                <Button variant="contained" color='primary' fullWidth={true} className={classes.placeOrderButton} onClick={this.placeOrderButtonClickHandler}>PLACE ORDER</Button>
+
+                            </CardContent>
+
+
+                        </Card>
+
                     </div>
 
                 </div>
