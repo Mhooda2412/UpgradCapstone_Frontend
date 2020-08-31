@@ -130,7 +130,7 @@ class Home extends Component {
     let data = null;
     let xhrRestaurant = new XMLHttpRequest();
     let that = this;
-    xhrRestaurant.addEventListener("readystatechange", function () {
+    xhrRestaurant.addEventListener("readystatechange", function() {
       if (xhrRestaurant.readyState === 4 && xhrRestaurant.status === 200) {
         let restaurant = JSON.parse(xhrRestaurant.responseText);
         that.setState({
@@ -183,7 +183,7 @@ class Home extends Component {
         <Header
           history={this.props.history}
           baseUrl={this.props.baseUrl}
-          showHeaderSearchBox={true}
+          showSearchBar={true}
           updateSearchRestaurant={this.updateSearchRestaurant}
         ></Header>
         <div className="flex-container">
